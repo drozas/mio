@@ -1,0 +1,35 @@
+model ModelName
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+
+!optional parameters section
+!parameters
+!  SAMPLEPARAM1="c:\test\"
+!  SAMPLEPARAM2=false
+!end-parameters
+
+!sample declarations section
+declarations
+! ...
+  Xa: mpvar
+  Xb: mpvar
+end-declarations
+
+funcObjetivo := 1000*Xa + 400*Xb
+
+2*Xa + Xb >=8 !Mínimas proteínas
+6*Xa + Xb >=12 !Mínimos hidratos de carbono
+Xa + 3*Xb >=9 !Mínimas grasas
+
+Xa>=0
+Xb>=0
+
+Xa is_integer
+Xb is_integer
+
+minimize(funcObjetivo)
+
+writeln("Gasto final: ", getobjval)
+writeln("Kg a comprar de tipo A: ", getsol(Xa))
+writeln("Kg a comprar de tipo B: ", getsol(Xb))
+
+end-model

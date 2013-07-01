@@ -1,0 +1,56 @@
+model Ejercicio03
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+
+declarations
+  TIPOS_GAS = 1..4
+  ADITIVO_A: array(TIPOS_GAS) of real
+  ADITIVO_B: array(TIPOS_GAS) of real
+  ADITIVO_C: array(TIPOS_GAS) of real
+  PRECIO: array(TIPOS_GAS) of real
+  
+  MEZCLA: mpvar
+  PORCENTAJE: array(TIPOS_GAS) of mpvar
+end-declarations
+
+!Datos del problema
+PRECIO := [43.0, 31.0, 47.0, 37.0]
+ADITIVO_A := [0.8, 0.3, 0.7, 0.4]
+ADITIVO_B := [0.1, 0.3, 0.1, 0.5]
+ADITIVO_C := [0.1, 0.4, 0.2, 0.1]
+
+
+funcObjetivo := sum(i in TIPOS_GAS) PRECIO(i)*PORCENTAJE(i)
+
+MEZCLA = 1.0 !Implícita
+
+!Mezcla a producir debe tener al menos 20% de aditivo A
+sum(i in TIPOS_GAS) ADITIVO_A(i)*PORCENTAJE(i) >= 0.2 * MEZCLA
+!Mezcla a producir debe tener al menos 30% de aditivo B
+sum(i in TIPOS_GAS) ADITIVO_B(i)*PORCENTAJE(i) >= 0.3 * MEZCLA
+!Mezcla a producir debe tener al menos 20% de aditivo C
+sum(i in TIPOS_GAS) ADITIVO_C(i)*PORCENTAJE(i) >= 0.2 * MEZCLA
+
+!No puede contener más de un 30% de gasolina de tipo 1
+PORCENTAJE(1)<=0.3 * MEZCLA
+!Ni más de un 40% de gasolina de tipo 2
+PORCENTAJE(2)<=0.4 * MEZCLA
+
+sum(i in TIPOS_GAS) PORCENTAJE(i) = MEZCLA !Implícita
+
+forall(i in TIPOS_GAS) PORCENTAJE(i)>=0
+
+forall(i in TIPOS_GAS) PORCENTAJE(i) is_continuous
+MEZCLA is_continuous
+
+
+minimize(funcObjetivo)
+
+writeln("Gasolina a producir")
+writeln("-------------------------")
+writeln("Porcentajes:")
+forall (i in TIPOS_GAS) writeln(getsol(PORCENTAJE(i))*100, "% de gasolina de tipo ", i)
+writeln("-------------------------")
+writeln("Precio: ", getobjval)
+writeln("-------------------------")
+end-model
+
